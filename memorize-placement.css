@@ -1,0 +1,194 @@
+/* --------- memorize-placement.css --------- */
+:root {
+    /* blank.png の実寸を読み取って上書きします */
+    --w: 1px;
+    --h: 1px;
+    --gap: 1px;
+    --bg: #0f172a;
+    --card: #111827;
+    --ink: #e5e7eb;
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(1200px 700px at 50% 220px, rgba(255,255,255,.07), rgba(0,0,0,0) 60%), linear-gradient(180deg,#0b1220,#0f172a 30%,#0b1220);
+    color: var(--ink);
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+}
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: url('background.png') center/cover no-repeat;
+        opacity: 0.36;
+        filter: saturate(110%) brightness(105%);
+    }
+
+header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+button {
+    cursor: pointer;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+}
+
+.wrap {
+    margin: auto;
+    background: var(--card);
+    padding: 30px;
+    background-color: var(--bg);
+    background-image: url('tatami.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.field {
+    display: inline-block;
+    padding: 8px;
+    background-color: var(--bg);
+    background-image: url('tatami.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 6px solid #243c1d;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(11, var(--w));
+    grid-auto-rows: var(--h);
+    gap: var(--gap);
+    justify-content: center;
+    background: transparent;
+}
+
+.cell {
+    width: var(--w);
+    height: var(--h);
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .cell.none {
+        /* レイアウトの“位置”は保持しつつ、見た目は消す */
+        visibility: hidden; /* 余白は確保、見た目だけ非表示 */
+        pointer-events: none;
+    }
+
+    .cell img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cell.flip img {
+        transform: rotate(180deg);
+    }
+
+.page {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr minmax(340px,480px);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "board lists"
+        "board controls";
+    gap: 24px;
+    align-items: start;
+}
+
+.side {
+    width: 260px;
+    max-width: 30vw;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 36px rgba(0,0,0,.35);
+    position: sticky;
+    top: 16px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.board {
+    grid-area: board;
+}
+
+.side.lists {
+    grid-area: lists;
+    width: 80%;
+    height: 100%;
+}
+
+.side.controls {
+    grid-area: controls;
+    width: 80%;
+}
+
+.lists-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    top: 16px;
+    align-self: start;
+}
+
+.listBox {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 12px 36px rgba(0,0,0,.35);
+    max-height: 460px;
+    overflow: auto;
+}
+
+    .listBox summary {
+        font-weight: 700;
+        cursor: default;
+        list-style: none;
+        margin-bottom: 6px;
+    }
+
+        .listBox summary::-webkit-details-marker {
+            display: none;
+        }
+
+.list-row {
+    cursor: pointer;
+}
+
+    .list-row.selected {
+        background: rgba(99,102,241,.18);
+        outline: 2px solid #6366f1;
+        border-radius: 8px;
+    }

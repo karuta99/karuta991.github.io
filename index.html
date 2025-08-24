@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ja">
+<!-- index.html -->
+<head>
+    <meta charset="utf-8" />
+    <title>競技かるた トレーニング</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --ink: #f1f5f9;
+            --pane: rgba(0,0,0,.28);
+            --pane-line: rgba(255,255,255,.5);
+            --pane-hover: rgba(255,255,255,.08);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+            /* 背景画像（/ と同階層に initial.png を置いてください） */
+            background-image: url("./initial.png");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            /* うっすら暗くして文字を読みやすくする */
+            position: relative;
+            overflow: hidden;
+        }
+            /* 薄いグラデーションのベール */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: radial-gradient(1200px 700px at 50% 220px, rgba(0,0,0,.15), rgba(0,0,0,0) 60%), linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15) 30%, rgba(0,0,0,.35));
+                pointer-events: none;
+            }
+
+        /* 中央の正方形タイトル */
+        .title-box {
+            position: fixed;
+            left: 50%;
+            top: 10vh; /* 画像の見え方に合わせて調整可 */
+            transform: translateX(-50%);
+            width: min(50vmin, 520px);
+            aspect-ratio: 1 / 1; /* 古い環境なら width と同じ高さで表示されます */
+            display: grid;
+            place-items: center;
+            border: 1.6px solid var(--pane-line);
+            background: rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 6px rgba(255,255,255,.06);
+            backdrop-filter: saturate(120%) blur(2px);
+        }
+
+        h1 {
+            margin: 0;
+            padding: .2em .6em;
+            font-size: clamp(20px, 4.5vmin, 36px);
+            letter-spacing: .16em;
+            text-align: center;
+            line-height: 1.5;
+            text-shadow: 0 2px 8px rgba(0,0,0,.6);
+        }
+
+        /* 下部メニュー（4つの縦長ボタン） */
+        nav.menu {
+            position: fixed;
+            left: 50%;
+            bottom: 6vh;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(4, minmax(110px, 160px));
+            gap: min(2.4vmin, 24px);
+            align-items: end;
+            padding: 0 8px;
+            width: min(92vw, 900px);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: clamp(140px, 28vh, 280px);
+            padding: 18px 10px;
+            border: 1.6px solid var(--pane-line);
+            border-radius: 6px;
+            background: var(--pane);
+            text-decoration: none;
+            color: var(--ink);
+            /* 縦書きで雰囲気を出す（対応外の環境でも横書きで読めます） */
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: clamp(16px, 3.2vmin, 24px);
+            letter-spacing: .15em;
+            text-shadow: 0 2px 6px rgba(0,0,0,.6);
+            transition: transform .12s ease-out, background-color .12s ease-out;
+            backdrop-filter: saturate(120%) blur(1px);
+        }
+
+            .btn:hover,
+            .btn:focus-visible {
+                background: calc(var(--pane) + var(--pane-hover));
+                transform: translateY(-4px);
+                outline: none;
+            }
+
+        /* モバイルでの下詰まり防止 */
+        @media (max-width:640px) {
+            .title-box {
+                top: 12vh;
+                width: min(78vmin, 520px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- デバッグ用 -->
+    <div class="title-box" aria-hidden="false">
+        <!--<h1>競技かるた<br>札流し<br>決まり字変化<br>配置暗記<br></h1>-->
+        <!-- 設定値 -->
+        <textarea style="width:100%;height:100%;">向き,変化,自動,待機,枚数,限定<br>
+            <!-- 要望 localstorageから上記6つの設定値をカンマ区切りで表示する 改行-->
+            決まり字一覧(番号だけ)<br>
+            <!-- 要望 selectedIdsからカンマ区切りで表示する。-->
+        </textarea>
+    </div>
+
+    <!-- 下部メニュー：左→右の順に a,b,c,d.html -->
+    <nav class="menu" aria-label="メインメニュー">
+        <a class="btn" href="./fuda-nagashi.html" aria-label="札流し">札流し</a>
+        <a class="btn" href="./memorize-placement.html" aria-label="配置暗記">配置暗記</a>
+        <a class="btn" href="./settings.html" aria-label="設定">設定</a>
+        <a class="btn" href="./links-url.html" aria-label="リンク集">リンク集</a>
+    </nav>
+    <script>
+        (() => {
+            const KEY = 'karutaSettings.v1';
+            const ta = document.querySelector('.title-box textarea');
+            if (!ta) return;
+
+            const load = () => {
+                try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+                catch { return {}; }
+            };
+
+            const asOnOff = v => (v ? 'ON' : 'OFF');
+            const dirLabel = v => ({ random: 'ランダム', normal: '正方向', reverse: '逆さま' }[v] || 'ランダム');
+
+            const render = () => {
+                const s = load();
+                const lines = [
+                    `向き,${dirLabel(s.direction)}`,
+                    `変化,${asOnOff(!!s.changing)}`,
+                    `自動,${asOnOff(!!s.autoAdvance)}`,
+                    `待機,${(s.waitMs ?? 500)}ms`,
+                    `枚数,${(s.count ?? 100)}`,
+                    `限定,${asOnOff(!!s.allOrPart)}`,
+                    '',
+                    '決まり字一覧(番号だけ)',
+                    Array.isArray(s.selectedIds)
+                        ? s.selectedIds.map(Number).sort((a, b) => a - b).join(',')
+                        : ''
+                ];
+                ta.value = lines.join('\n');
+            };
+
+            // 初期表示
+            render();
+            // 設定画面で変更→戻ってきたとき等、他タブからの更新も反映
+            window.addEventListener('storage', (ev) => {
+                if (ev.key === KEY) render();
+            });
+        })();
+    </script>
+
+</body>
+</html>
